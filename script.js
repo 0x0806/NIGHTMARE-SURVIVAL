@@ -9,7 +9,7 @@ class GameEngine {
         this.ctx = null;
         this.isLoaded = false;
         this.currentScreen = 'loading';
-        this.gameState = 'menu';
+        this.gameState = 'loading';
         this.settings = {
             volume: 70,
             graphicsQuality: 'medium',
@@ -166,6 +166,7 @@ class GameEngine {
             document.getElementById('loading-screen').style.opacity = '0';
             setTimeout(() => {
                 document.getElementById('loading-screen').style.display = 'none';
+                this.gameState = 'menu';
             }, 500);
         }, 1000);
     }
@@ -180,8 +181,13 @@ class GameEngine {
         document.querySelectorAll('.screen').forEach(screen => {
             screen.classList.remove('active');
         });
-        document.getElementById(screenId).classList.add('active');
-        this.currentScreen = screenId;
+        const targetScreen = document.getElementById(screenId);
+        if (targetScreen) {
+            targetScreen.classList.add('active');
+            this.currentScreen = screenId;
+        } else {
+            console.warn(`Screen with id '${screenId}' not found`);
+        }
     }
     
     startGame(speedrunMode = false) {
@@ -427,7 +433,8 @@ class GameEngine {
     
     checkPlayerCollisions() {
         // Enemy collisions
-        this.enemies.forEach((enemy, index) => {
+        for (let i = this.enemies.length - 1; i >= 0; i--) {
+            const enemy = this.enemies[i];
             if (this.checkCollision(this.player, enemy)) {
                 if (!enemy.isHallucination) {
                     this.takeDamage(20);
@@ -435,18 +442,19 @@ class GameEngine {
                     this.player.damaged = true;
                     setTimeout(() => this.player.damaged = false, 500);
                 }
-                this.enemies.splice(index, 1);
+                this.enemies.splice(i, 1);
             }
-        });
+        }
         
         // Power-up collisions
-        if (this.powerUps) {
-            this.powerUps.forEach((powerUp, index) => {
+        if (this.powerUps && this.powerUps.length > 0) {
+            for (let i = this.powerUps.length - 1; i >= 0; i--) {
+                const powerUp = this.powerUps[i];
                 if (this.checkCollision(this.player, powerUp)) {
                     this.collectPowerUp(powerUp);
-                    this.powerUps.splice(index, 1);
+                    this.powerUps.splice(i, 1);
                 }
-            });
+            }
         }
     }
     
@@ -531,11 +539,18 @@ class GameEngine {
             mode: this.isSpeedrun ? 'speedrun' : 'survival'
         });
         
-        document.getElementById('death-overlay').classList.remove('hidden');
+        const deathOverlay = document.getElementById('death-overlay');
+        if (deathOverlay) {
+            deathOverlay.classList.remove('hidden');
+        }
     }
     
     restartGame() {
-        document.getElementById('death-overlay').classList.add('hidden');
+        const deathOverlay = document.getElementById('death-overlay');
+        if (deathOverlay) {
+            deathOverlay.classList.add('hidden');
+        }
+        this.gameState = 'menu';
         this.startGame(this.isSpeedrun);
     }
     
@@ -544,7 +559,8 @@ class GameEngine {
         const healthFill = document.querySelector('.health-fill');
         const healthText = document.querySelector('.health-text');
         if (healthFill && healthText) {
-            healthFill.style.width = `${this.health}%`;
+            const healthPercent = Math.max(0, Math.min(100, this.health));
+            healthFill.style.width = `${healthPercent}%`;
             healthText.textContent = Math.floor(this.health);
         }
         
@@ -552,7 +568,8 @@ class GameEngine {
         const sanityFill = document.querySelector('.sanity-fill');
         const sanityText = document.querySelector('.sanity-text');
         if (sanityFill && sanityText) {
-            sanityFill.style.width = `${this.sanity}%`;
+            const sanityPercent = Math.max(0, Math.min(100, this.sanity));
+            sanityFill.style.width = `${sanityPercent}%`;
             
             if (this.sanity > 70) sanityText.textContent = 'SANE';
             else if (this.sanity > 40) sanityText.textContent = 'UNEASY';
@@ -595,25 +612,42 @@ class GameEngine {
     showLeaderboard() {
         this.showScreen('leaderboard-screen');
         this.loadLeaderboard();
+        
+        // Setup tab functionality
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        tabButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                tabButtons.forEach(tab => tab.classList.remove('active'));
+                e.target.classList.add('active');
+                this.loadLeaderboard(e.target.getAttribute('data-mode') || 'survival');
+            });
+        });
     }
     
-    loadLeaderboard() {
-        const entries = this.highScoreManager.getLeaderboard();
+    loadLeaderboard(mode = 'survival') {
+        const entries = this.highScoreManager.getLeaderboard(mode);
         const container = document.getElementById('leaderboard-entries');
         if (container) {
             container.innerHTML = '';
             
-            entries.forEach((entry, index) => {
-                const entryDiv = document.createElement('div');
-                entryDiv.className = 'leaderboard-entry';
-                entryDiv.innerHTML = `
-                    <span>${index + 1}</span>
-                    <span>Player ${entry.id || 'Anonymous'}</span>
-                    <span>${entry.score}</span>
-                    <span>${entry.level}</span>
-                `;
-                container.appendChild(entryDiv);
-            });
+            if (entries.length === 0) {
+                const noDataDiv = document.createElement('div');
+                noDataDiv.className = 'leaderboard-entry';
+                noDataDiv.innerHTML = '<span colspan="4">No scores yet - be the first!</span>';
+                container.appendChild(noDataDiv);
+            } else {
+                entries.forEach((entry, index) => {
+                    const entryDiv = document.createElement('div');
+                    entryDiv.className = 'leaderboard-entry';
+                    entryDiv.innerHTML = `
+                        <span>${index + 1}</span>
+                        <span>Player ${entry.id || 'Anonymous'}</span>
+                        <span>${entry.score || 0}</span>
+                        <span>${entry.level || 1}</span>
+                    `;
+                    container.appendChild(entryDiv);
+                });
+            }
         }
     }
     
