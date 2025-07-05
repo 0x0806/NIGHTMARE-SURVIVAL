@@ -230,6 +230,25 @@ body {
     z-index: 100;
 }
 
+/* Developer Credits */
+.developer-credits {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    background: var(--glass-bg);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: var(--border-radius);
+    padding: 0.5rem 1rem;
+    backdrop-filter: blur(10px);
+    font-size: 0.9rem;
+    opacity: 0.8;
+    color: var(--text-color);
+    text-align: center;
+    animation: pulse 4s ease-in-out infinite;
+}
+
 #theme-btn {
     background: var(--glass-bg);
     border: 2px solid var(--primary-color);
