@@ -246,7 +246,7 @@ This project is open source and available under the MIT License.
 
 Start your nightmare survival experience today! The game runs entirely in your browser with no downloads required.
 
-**Live Demo**: [Play Nightmare Survival](https://replit.com/@your-username/nightmare-survival)
+**Live Demo**: [Play Nightmare Survival](https://0x0806.github.io/NIGHTMARE-SURVIVAL/)
 
 ---
 
