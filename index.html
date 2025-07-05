@@ -1,0 +1,135 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Nightmare Survival - Ultra Hard Horror Game</title>
+    <link href="style.css" rel="stylesheet">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Creepster&family=Nosifer&display=swap" as="style">
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Nosifer&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">LOADING NIGHTMARE...</div>
+        <div class="loading-progress">
+            <div class="loading-bar"></div>
+        </div>
+    </div>
+
+    <div id="main-menu" class="screen active">
+        <div class="parallax-bg">
+            <div class="parallax-layer" data-speed="0.2"></div>
+            <div class="parallax-layer" data-speed="0.5"></div>
+            <div class="parallax-layer" data-speed="0.8"></div>
+        </div>
+        <div class="menu-content">
+            <h1 class="game-title">NIGHTMARE SURVIVAL</h1>
+            <div class="menu-buttons">
+                <button id="start-game" class="menu-btn primary">START NIGHTMARE</button>
+                <button id="speedrun-mode" class="menu-btn">SPEEDRUN MODE</button>
+                <button id="leaderboard" class="menu-btn">LEADERBOARD</button>
+                <button id="settings" class="menu-btn">SETTINGS</button>
+            </div>
+        </div>
+        <div class="theme-toggle">
+            <button id="theme-btn">🌙</button>
+        </div>
+    </div>
+
+    <div id="game-screen" class="screen">
+        <canvas id="game-canvas"></canvas>
+        <div id="game-ui">
+            <div class="ui-top">
+                <div class="health-bar">
+                    <div class="health-fill"></div>
+                    <span class="health-text">100</span>
+                </div>
+                <div class="sanity-bar">
+                    <div class="sanity-fill"></div>
+                    <span class="sanity-text">SANE</span>
+                </div>
+                <div class="level-info">
+                    <span id="level-number">LEVEL 1</span>
+                    <span id="timer">00:00</span>
+                </div>
+            </div>
+            <div class="ui-center">
+                <div id="interaction-prompt" class="interaction-prompt hidden">Press E to interact</div>
+            </div>
+            <div class="ui-bottom">
+                <div class="controls-hint">
+                    <span>WASD: Move | SPACE: Jump | E: Interact | SHIFT: Run</span>
+                </div>
+            </div>
+        </div>
+        <div id="death-overlay" class="overlay hidden">
+            <div class="death-content">
+                <h2>YOU DIED</h2>
+                <p>Your nightmare has consumed you...</p>
+                <button id="restart-btn" class="menu-btn">TRY AGAIN</button>
+                <button id="main-menu-btn" class="menu-btn">MAIN MENU</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="leaderboard-screen" class="screen">
+        <div class="leaderboard-content">
+            <h2>GLOBAL LEADERBOARD</h2>
+            <div class="leaderboard-tabs">
+                <button class="tab-btn active" data-mode="survival">SURVIVAL</button>
+                <button class="tab-btn" data-mode="speedrun">SPEEDRUN</button>
+            </div>
+            <div class="leaderboard-list">
+                <div class="leaderboard-header">
+                    <span>RANK</span>
+                    <span>PLAYER</span>
+                    <span>SCORE</span>
+                    <span>LEVEL</span>
+                </div>
+                <div id="leaderboard-entries"></div>
+            </div>
+            <button id="back-to-menu" class="menu-btn">BACK</button>
+        </div>
+    </div>
+
+    <div id="settings-screen" class="screen">
+        <div class="settings-content">
+            <h2>SETTINGS</h2>
+            <div class="settings-grid">
+                <div class="setting-group">
+                    <label>Audio Volume</label>
+                    <input type="range" id="volume-slider" min="0" max="100" value="70">
+                </div>
+                <div class="setting-group">
+                    <label>Graphics Quality</label>
+                    <select id="graphics-quality">
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
+                        <option value="ultra">Ultra</option>
+                    </select>
+                </div>
+                <div class="setting-group">
+                    <label>Motion Effects</label>
+                    <input type="checkbox" id="motion-effects" checked>
+                </div>
+                <div class="setting-group">
+                    <label>Haptic Feedback</label>
+                    <input type="checkbox" id="haptic-feedback" checked>
+                </div>
+            </div>
+            <button id="settings-back" class="menu-btn">BACK</button>
+        </div>
+    </div>
+
+    <div id="particle-container"></div>
+    <div id="audio-controls" class="hidden">
+        <audio id="ambient-audio" loop></audio>
+        <audio id="sfx-audio"></audio>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
