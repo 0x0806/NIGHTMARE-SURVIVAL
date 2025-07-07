@@ -153,7 +153,7 @@ nightmare-survival/
 ├── style.css           # Comprehensive styling
 ├── script.js           # Game engine and logic
 ├── README.md           # This documentation
-└── .replit            # Replit configuration
+
 ```
 
 ### Key Classes
