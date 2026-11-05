@@ -67,7 +67,6 @@ ok('true ending with 10+ notes', end2 === 'Ending: The Way Out', end2);
 await p.evaluate(() => __game.storyFinish()); await sleep(600); await p.click('#story-skip'); await sleep(500);
 const es = await p.evaluate(() => ({ screen: __game.screenName, state: __game.state, hidden: document.getElementById('clear-name-row').hidden, fin: __game.storyFinished, btn: document.getElementById('story-skip').textContent }));
 ok('ending leads to score screen', es.screen === 'clear' && !es.hidden, JSON.stringify(es));
-await p.screenshot({ path: 'ending-screen.png' });
 // pressure / compass
 const comp = await p.evaluate(() => { const g = __game; g.beginLevel(2); g.fade = 0; g.fuseGot = g.fuseNeed; g.update(1 / 60); return { hidden: document.getElementById('compass').hidden, dist: document.getElementById('compass-dist').textContent }; });
 ok('lift compass appears when fuses restored', comp.hidden === false && /m$/.test(comp.dist), JSON.stringify(comp));
