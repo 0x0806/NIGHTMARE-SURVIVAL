@@ -1,7 +1,7 @@
 /* Nightmare Survival — interface styles.
    Visual language: a typed patient file under a dying lamp. Bone paper, sodium light, dried blood. */
-@font-face { font-family: 'IM Fell English SC'; src: url('fonts/IMFellEnglishSC.ttf') format('truetype'); font-display: swap; }
-@font-face { font-family: 'Special Elite'; src: url('fonts/SpecialElite.ttf') format('truetype'); font-display: swap; }
+@font-face { font-family: 'IM Fell English SC'; src: url('fonts/IMFellEnglishSC.woff2') format('woff2'); font-display: swap; }
+@font-face { font-family: 'Special Elite'; src: url('fonts/SpecialElite.woff2') format('woff2'); font-display: swap; }
 
 :root {
   --void: #06070a;
@@ -96,7 +96,7 @@ input[type=text]:focus { outline: none; border-color: var(--sodium); }
 .tab { padding: 8px 18px; color: var(--bone-dim); border-bottom: 2px solid transparent; margin-bottom: -1px; }
 .tab.on { color: var(--sodium); border-color: var(--sodium); }
 .tab:hover { color: var(--bone); }
-.lb-head, .lb li { display: grid; grid-template-columns: 2.2rem 1fr 6.5rem 6rem; gap: 10px; padding: 9px 4px; align-items: baseline; }
+.lb-head, .lb li { display: grid; grid-template-columns: 2.2rem 1fr 6rem 10rem; gap: 10px; padding: 9px 4px; align-items: baseline; }
 .lb-head { color: var(--bone-dim); font-size: .85rem; border-bottom: 1px solid rgba(217, 210, 186, .15); }
 .lb ol { list-style: none; min-height: 150px; }
 .lb li { border-bottom: 1px dotted rgba(217, 210, 186, .12); }
@@ -105,6 +105,9 @@ input[type=text]:focus { outline: none; border-color: var(--sodium); }
 .lb li.empty { display: block; padding: 28px 4px; color: var(--bone-dim); }
 .num { text-align: right; font-variant-numeric: tabular-nums; }
 
+.notes { list-style: none; display: flex; flex-direction: column; gap: 10px; max-height: 46vh; overflow: auto; padding-right: 6px; }
+.notes li { padding: 10px 14px; border-left: 2px solid var(--sodium); background: rgba(0, 0, 0, .25); line-height: 1.5; font-size: .95rem; }
+.notes li.locked { border-color: rgba(217, 210, 186, .2); color: var(--bone-dim); }
 /* settings */
 .opts { display: grid; grid-template-columns: 1fr minmax(120px, 190px); gap: 16px 20px; align-items: center; }
 .opts label { display: flex; justify-content: space-between; gap: 12px; }
@@ -132,6 +135,7 @@ select { font: inherit; color: var(--bone); background: var(--ink); border: 1px 
 .ward { display: flex; gap: 14px; align-items: baseline; text-shadow: 0 1px 3px #000; }
 .ward strong { font-family: var(--serif); font-weight: 400; font-size: 1.3rem; color: var(--bone); }
 .ward span { color: var(--sodium); font-variant-numeric: tabular-nums; }
+.ward .score { color: var(--bone-dim); }
 #minimap { width: 150px; height: 150px; background: rgba(0, 0, 0, .45); border: 1px solid rgba(217, 210, 186, .25); }
 .objective { position: absolute; bottom: max(16px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); display: flex; gap: 10px; align-items: center; padding: 6px 14px; background: rgba(0, 0, 0, .5); border: 1px solid rgba(217, 210, 186, .2); font-size: .9rem; white-space: nowrap; }
 .objective b { color: var(--sodium); font-weight: 400; font-variant-numeric: tabular-nums; }
@@ -144,7 +148,7 @@ select { font: inherit; color: var(--bone); background: var(--ink); border: 1px 
 .prompt.show { opacity: 1; }
 .toast { position: absolute; left: 50%; top: 18%; transform: translate(-50%, -6px); opacity: 0; transition: opacity .35s, transform .35s; text-align: center; max-width: 80vw; text-shadow: 0 2px 10px #000; font-size: 1.05rem; }
 .toast.show { opacity: 1; transform: translate(-50%, 0); }
-.card { position: absolute; left: 0; right: 0; top: 38%; text-align: center; opacity: 0; }
+.card { position: absolute; left: 0; right: 0; top: 20%; text-align: center; opacity: 0; }
 .card h2 { font-size: clamp(2rem, 7vw, 4rem); letter-spacing: .08em; text-shadow: 0 0 30px rgba(0, 0, 0, .9); }
 .card p { color: var(--sodium); margin-top: 6px; }
 .card.show { animation: card 4.2s ease both; }

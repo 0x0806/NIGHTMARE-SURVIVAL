@@ -19,8 +19,11 @@ The ward lost power at 3:07 a.m. Restore every fuse, reach the exit, and don't l
   - *Howler*: never moves, but its scream pulls every hunter to you.
 - **Sanity:** darkness and close encounters erode it. Low sanity brings flickering light, hallucinations and screen distortion; at zero it hurts you.
 - **Noise:** sprinting is loud, standing still is quiet, throwing a flare is loud. Enemies react to what they hear.
+- **Lockers:** press `E` beside one to hide. Hunters lose sight of you, but they come and check, and a hunter that stands next to your locker long enough finds you.
+- **Lamps:** some rooms have ceiling lamps. Lit rooms restore your mind and freeze the Stalker. Many of them are failing, and flicker.
+- **Case file:** each ward hides a note from the staff. Collected notes are saved and readable from the menu.
 - **Pickups:** batteries, medkits, pills and flares are scattered around; fuses glow faintly through the dark.
-- **Adaptive difficulty:** a small director nudges enemy speed and pickup supply up or down based on how you did last ward.
+- **Difficulty:** Easy, Normal or Nightmare (enemy speed, supplies and score multiplier). On top of that, a small director nudges things up or down based on how you did last ward.
 
 ### Modes
 
@@ -40,7 +43,7 @@ Leaderboards are stored **locally on your device** (`localStorage`); there is no
 | `Shift` | Run (loud, drains breath) |
 | Left click / `F` / `Space` | Throw a flare |
 | Right click / `Q` | Torch on/off |
-| `E` | Use the exit |
+| `E` | Use the exit / hide in a locker / come out |
 | `Esc` / `P` | Pause |
 | `M` | Mute |
 
@@ -48,7 +51,7 @@ Leaderboards are stored **locally on your device** (`localStorage`); there is no
 
 ## Settings
 
-Volume, darkness, graphics quality (also auto-lowers if the frame rate drops), screen shake and glitches (off by default when your OS asks for reduced motion), vibration, and a frame-rate counter.
+Difficulty, volume, darkness (higher is harder to see), graphics quality (temporarily lowers itself if the frame rate drops, without changing your saved setting), screen shake and glitches (off by default when your OS asks for reduced motion), vibration, and a frame-rate counter.
 
 ## Under the hood
 
@@ -58,7 +61,7 @@ Volume, darkness, graphics quality (also auto-lowers if the frame rate drops), s
 | `style.css` | Interface styling |
 | `script.js` | Everything else |
 | `sw.js`, `manifest.webmanifest` | Offline cache and install support |
-| `fonts/`, `icons/` | Self-hosted fonts and icons (no third-party requests) |
+| `fonts/`, `icons/` | Self-hosted woff2 fonts, app icons and the link-preview image (no third-party requests) |
 
 `script.js` is organised into: seeded level generator (rooms, corridors, props with guaranteed connectivity), grid-DDA raycaster used for lighting and line of sight, enemy AI (patrol / investigate / chase / search) over BFS flow fields, a procedural Web Audio engine (drones, heartbeat, positional growls, no audio files), a canvas renderer with pre-baked tile sprites, and the UI/state machine.
 

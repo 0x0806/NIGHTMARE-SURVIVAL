@@ -9,14 +9,19 @@
 <meta property="og:title" content="Nightmare Survival">
 <meta property="og:description" content="A top-down flashlight horror game that runs in your browser. Four things hunt you. Your light is the only weapon.">
 <meta property="og:type" content="website">
-<meta property="og:image" content="https://0x0806.github.io/NIGHTMARE-SURVIVAL/icons/icon.svg">
-<meta name="twitter:card" content="summary">
+<meta property="og:image" content="https://0x0806.github.io/NIGHTMARE-SURVIVAL/icons/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://0x0806.github.io/NIGHTMARE-SURVIVAL/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://0x0806.github.io/NIGHTMARE-SURVIVAL/icons/og.png">
+<link rel="canonical" href="https://0x0806.github.io/NIGHTMARE-SURVIVAL/">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="icons/icon.svg">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="preload" href="fonts/IMFellEnglishSC.ttf" as="font" type="font/ttf" crossorigin>
-<link rel="preload" href="fonts/SpecialElite.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="preload" href="fonts/IMFellEnglishSC.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/SpecialElite.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -39,7 +44,7 @@
     <div class="gauge sta"><span class="g-label">Breath</span><div class="track thin"><i id="bar-sta"></i></div></div>
   </div>
   <div class="topright">
-    <div class="ward"><strong id="hud-level">Ward 1</strong><span id="hud-time">00:00</span></div>
+    <div class="ward"><strong id="hud-level">Ward 1</strong><span id="hud-time">00:00</span><span id="hud-score" class="score" title="Score">0</span></div>
     <canvas id="minimap" width="150" height="150" aria-label="Map"></canvas>
     <button id="btn-pause-touch" class="touch-only" aria-label="Pause">II</button>
   </div>
@@ -70,6 +75,7 @@
       <button id="btn-speed">Speedrun, five wards</button>
       <button id="btn-lb">Leaderboard</button>
       <button id="btn-howto">How to play</button>
+      <button id="btn-notes">Case file</button>
       <button id="btn-settings">Settings</button>
     </nav>
     <div class="menu-foot"><button id="btn-mute" class="link" aria-pressed="false">Sound on</button><span>Developed by 0x0806</span></div>
@@ -90,7 +96,7 @@
           <dt>Shift</dt><dd>Run (loud, tires you out)</dd>
           <dt>Left click or F</dt><dd>Throw a flare</dd>
           <dt>Right click or Q</dt><dd>Torch on / off</dd>
-          <dt>E</dt><dd>Use the exit</dd>
+          <dt>E</dt><dd>Use the exit, hide in a locker</dd>
           <dt>Esc or P</dt><dd>Pause</dd>
         </dl>
         <p class="small">Touch: left stick moves, right stick aims. Gamepad: sticks, A flare, X torch, Y use.</p>
@@ -107,10 +113,22 @@
         <ul class="bestiary">
           <li>Darkness drains your mind. Low sanity brings hallucinations and eventually hurts you.</li>
           <li>Fuses glow faintly through the dark. Pills, batteries and medkits are scattered around.</li>
+          <li><b>Lockers.</b> Press E beside one to hide. Hunters lose you, but they will come and check.</li>
+          <li><b>Lamps.</b> Lit rooms calm your mind and freeze the Stalker. Some are failing.</li>
         </ul>
       </div>
     </div>
     <button id="howto-back" class="btn">Back</button>
+  </div>
+</section>
+
+<!-- Case file -->
+<section id="screen-notes" class="screen" aria-label="Case file">
+  <div class="sheet wide">
+    <h2>Case file</h2>
+    <p class="lead">Notes left behind by staff. Find them in the wards. <span id="notes-count"></span></p>
+    <ol id="notes-list" class="notes"></ol>
+    <button id="notes-back" class="btn">Back</button>
   </div>
 </section>
 
@@ -139,6 +157,8 @@
       <input type="range" id="opt-volume" min="0" max="100" value="70">
       <label for="opt-brightness">Darkness <output id="opt-brightness-val">50%</output></label>
       <input type="range" id="opt-brightness" min="0" max="100" value="50">
+      <label for="opt-difficulty">Difficulty</label>
+      <select id="opt-difficulty"><option value="easy">Easy</option><option value="normal">Normal</option><option value="nightmare">Nightmare</option></select>
       <label for="opt-quality">Graphics</label>
       <select id="opt-quality"><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select>
       <label for="opt-shake">Screen shake and glitches</label>
@@ -148,7 +168,7 @@
       <label for="opt-fps">Show frame rate</label>
       <input type="checkbox" id="opt-fps">
     </div>
-    <p class="small">Higher darkness values make the ward harder to read. Turn off shake and glitches to reduce motion.</p>
+    <p class="small">Difficulty applies to your next run and scales enemies, supplies and score. Higher darkness makes the ward harder to read. Turn off shake and glitches to reduce motion.</p>
     <button id="settings-back" class="btn">Back</button>
   </div>
 </section>
