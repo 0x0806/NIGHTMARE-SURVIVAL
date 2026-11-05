@@ -23,7 +23,7 @@
     { "name": "Speedrun", "short_name": "Speedrun", "url": "./?mode=speedrun", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
   ],
   "screenshots": [
-    { "src": "docs/screenshots/gameplay.png", "sizes": "1280x720", "type": "image/png", "form_factor": "wide", "label": "Exploring a ward by flashlight" },
+    { "src": "docs/screenshots/3d-corridor.png", "sizes": "1280x720", "type": "image/png", "form_factor": "wide", "label": "First-person 3D: a ward by flashlight" },
     { "src": "docs/screenshots/menu.png", "sizes": "1280x720", "type": "image/png", "form_factor": "wide", "label": "Main menu" },
     { "src": "docs/screenshots/mobile-portrait.png", "sizes": "390x844", "type": "image/png", "form_factor": "narrow", "label": "Main menu on a phone" }
   ]

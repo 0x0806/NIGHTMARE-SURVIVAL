@@ -29,6 +29,7 @@
 </head>
 <body>
 <canvas id="stage" aria-label="Game view"></canvas>
+<canvas id="stage3d" aria-label="First-person 3D game view"></canvas>
 
 <div id="loading" role="status">
   <p class="load-title">Nightmare Survival</p>
@@ -53,6 +54,10 @@
   </div>
   <div class="objective" id="obj"><span class="obj-icon" aria-hidden="true"></span><span id="obj-text">Fuses restored</span><b id="val-fuses">0/0</b></div>
   <div class="inventory"><span class="flare-ico" aria-hidden="true"></span>Flares <b id="val-flares">2</b></div>
+  <div id="crosshair" aria-hidden="true"></div>
+  <button id="lock-hint" class="lock-hint" hidden>Click to look around</button>
+  <div id="compass" class="compass" hidden><div class="arrow" aria-hidden="true"></div><span id="compass-dist">0 m</span><small>Lift</small></div>
+  <div id="radio" class="radio" aria-live="polite"><b id="radio-who"></b><p id="radio-text"></p></div>
   <div id="prompt" class="prompt" aria-live="polite"></div>
   <div id="toast" class="toast" aria-live="polite"></div>
   <div id="card" class="card"><h2 id="card-title">The Intake Ward</h2><p id="card-sub">Level 1</p></div>
@@ -68,13 +73,24 @@
   </div>
 </div>
 
+<!-- Story / cutscene -->
+<section id="screen-story" class="screen" aria-label="Story">
+  <div class="story">
+    <h2 id="story-title"></h2>
+    <div id="story-text" aria-live="polite"></div>
+    <button id="story-skip" class="btn">Skip</button>
+  </div>
+</section>
+
 <!-- Main menu -->
 <section id="screen-menu" class="screen active" aria-label="Main menu">
   <div class="menu-wrap">
     <h1 class="title"><span>Nightmare</span><span>Survival</span></h1>
-    <p class="tagline">The ward lost power at 3:07 a.m. Something is still on shift.</p>
+    <p class="tagline">Your sister is in the Last Ward. The lift needs fuses. Something is still on shift.</p>
     <nav class="menu" aria-label="Main">
-      <button id="btn-start" data-autofocus>Start survival</button>
+      <button id="btn-start" data-autofocus>Play the story</button>
+      <button id="btn-continue" hidden>Continue story</button>
+      <button id="btn-endless">Endless survival</button>
       <button id="btn-speed">Speedrun, five wards</button>
       <button id="btn-lb">Leaderboard</button>
       <button id="btn-howto">How to play</button>
@@ -89,13 +105,13 @@
 <section id="screen-howto" class="screen" aria-label="How to play">
   <div class="sheet wide">
     <h2>Patient survival notes</h2>
-    <p class="lead">Restore every fuse in the ward, then reach the exit. Your torch is the only weapon you have, and it runs out.</p>
+    <p class="lead">Restore every fuse in the ward, then reach the lift. Your torch is the only weapon you have, and it runs out.</p>
     <div class="cols">
       <div>
         <h3>Controls</h3>
         <dl class="keys">
           <dt>W A S D</dt><dd>Move</dd>
-          <dt>Mouse</dt><dd>Aim the torch</dd>
+          <dt>Mouse</dt><dd>Look and aim the torch</dd>
           <dt>Shift</dt><dd>Run (loud, tires you out)</dd>
           <dt>Left click or F</dt><dd>Throw a flare</dd>
           <dt>Right click or Q</dt><dd>Torch on / off</dd>
@@ -118,6 +134,7 @@
           <li>Fuses glow faintly through the dark. Pills, batteries and medkits are scattered around.</li>
           <li><b>Lockers.</b> Press E beside one to hide. Hunters lose you, but they will come and check.</li>
           <li><b>Lamps.</b> Lit rooms calm your mind and freeze the Stalker. Some are failing.</li>
+          <li><b>Pressure.</b> The ward keeps hunting. Every so often something is sent to where you last were. Never stay put.</li>
         </ul>
       </div>
     </div>
@@ -141,6 +158,7 @@
     <h2>Survivors on this device</h2>
     <div class="tabs" role="tablist">
       <button class="tab on" data-mode="survival" role="tab" aria-selected="true">Survival</button>
+      <button class="tab" data-mode="story" role="tab" aria-selected="false">Story</button>
       <button class="tab" data-mode="speedrun" role="tab" aria-selected="false">Speedrun</button>
     </div>
     <div class="lb">
@@ -160,6 +178,10 @@
       <input type="range" id="opt-volume" min="0" max="100" value="70">
       <label for="opt-brightness">Darkness <output id="opt-brightness-val">50%</output></label>
       <input type="range" id="opt-brightness" min="0" max="100" value="50">
+      <label for="opt-view">View</label>
+      <select id="opt-view"><option value="auto">First-person 3D</option><option value="2d">Top-down 2D</option></select>
+      <label for="opt-sens">Look sensitivity <output id="opt-sens-val">50%</output></label>
+      <input type="range" id="opt-sens" min="5" max="100" value="50">
       <label for="opt-difficulty">Difficulty</label>
       <select id="opt-difficulty"><option value="easy">Easy</option><option value="normal">Normal</option><option value="nightmare">Nightmare</option></select>
       <label for="opt-quality">Graphics</label>
@@ -207,6 +229,7 @@
 <section id="screen-clear" class="screen" aria-label="Ward cleared">
   <div class="sheet narrow">
     <h2 id="clear-title">Ward cleared</h2>
+    <p id="clear-quote" class="quote" hidden></p>
     <dl id="clear-stats" class="stats"></dl>
     <div id="clear-name-row" class="name-row" hidden>
       <label for="clear-name">Name for the leaderboard</label>
