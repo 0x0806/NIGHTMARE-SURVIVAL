@@ -1,138 +1,195 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Nightmare Survival - Ultra Hard Horror Game</title>
-    <link href="style.css" rel="stylesheet">
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Creepster&family=Nosifer&display=swap" as="style">
-    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Nosifer&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Nightmare Survival</title>
+<meta name="description" content="A top-down flashlight horror game. Restore the fuses, find the exit, and keep your sanity in a ward that is learning how you move.">
+<meta name="theme-color" content="#06070a">
+<meta property="og:title" content="Nightmare Survival">
+<meta property="og:description" content="A top-down flashlight horror game that runs in your browser. Four things hunt you. Your light is the only weapon.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%2306070a'/%3E%3Cpath d='M32 32 L58 14 A32 32 0 0 1 58 50Z' fill='%23f2c46d' opacity='.85'/%3E%3Ccircle cx='32' cy='32' r='6' fill='%23d9d2ba'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Special+Elite&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="loading-screen" class="loading-screen">
-        <div class="loading-spinner"></div>
-        <div class="loading-text">LOADING NIGHTMARE...</div>
-        <div class="loading-progress">
-            <div class="loading-bar"></div>
-        </div>
-    </div>
+<canvas id="stage" aria-label="Game view"></canvas>
 
-    <div id="main-menu" class="screen active">
-        <div class="parallax-bg">
-            <div class="parallax-layer" data-speed="0.2"></div>
-            <div class="parallax-layer" data-speed="0.5"></div>
-            <div class="parallax-layer" data-speed="0.8"></div>
-        </div>
-        <div class="menu-content">
-            <h1 class="game-title">NIGHTMARE SURVIVAL</h1>
-            <div class="menu-buttons">
-                <button id="start-game" class="menu-btn primary">START NIGHTMARE</button>
-                <button id="speedrun-mode" class="menu-btn">SPEEDRUN MODE</button>
-                <button id="leaderboard" class="menu-btn">LEADERBOARD</button>
-                <button id="settings" class="menu-btn">SETTINGS</button>
-            </div>
-        </div>
-        <div class="theme-toggle">
-            <button id="theme-btn">🌙</button>
-        </div>
-        <div class="developer-credits">
-            <span>Developed by 0x0806</span>
-        </div>
-    </div>
+<div id="loading" role="status">
+  <p class="load-title">Nightmare Survival</p>
+  <div class="load-track"><div id="load-bar"></div></div>
+  <p class="load-hint">Headphones recommended.</p>
+</div>
 
-    <div id="game-screen" class="screen">
-        <canvas id="game-canvas"></canvas>
-        <div id="game-ui">
-            <div class="ui-top">
-                <div class="health-bar">
-                    <div class="health-fill"></div>
-                    <span class="health-text">100</span>
-                </div>
-                <div class="sanity-bar">
-                    <div class="sanity-fill"></div>
-                    <span class="sanity-text">SANE</span>
-                </div>
-                <div class="level-info">
-                    <span id="level-number">LEVEL 1</span>
-                    <span id="timer">00:00</span>
-                </div>
-            </div>
-            <div class="ui-center">
-                <div id="interaction-prompt" class="interaction-prompt hidden">Press E to interact</div>
-            </div>
-            <div class="ui-bottom">
-                <div class="controls-hint">
-                    <span>WASD: Move | SPACE: Jump | E: Interact | SHIFT: Run</span>
-                </div>
-            </div>
-        </div>
-        <div id="death-overlay" class="overlay hidden">
-            <div class="death-content">
-                <h2>YOU DIED</h2>
-                <p>Your nightmare has consumed you...</p>
-                <button id="restart-btn" class="menu-btn">TRY AGAIN</button>
-                <button id="main-menu-btn" class="menu-btn">MAIN MENU</button>
-            </div>
-        </div>
-    </div>
+<noscript><p class="noscript">Nightmare Survival needs JavaScript to run.</p></noscript>
 
-    <div id="leaderboard-screen" class="screen">
-        <div class="leaderboard-content">
-            <h2>GLOBAL LEADERBOARD</h2>
-            <div class="leaderboard-tabs">
-                <button class="tab-btn active" data-mode="survival">SURVIVAL</button>
-                <button class="tab-btn" data-mode="speedrun">SPEEDRUN</button>
-            </div>
-            <div class="leaderboard-list">
-                <div class="leaderboard-header">
-                    <span>RANK</span>
-                    <span>PLAYER</span>
-                    <span>SCORE</span>
-                    <span>LEVEL</span>
-                </div>
-                <div id="leaderboard-entries"></div>
-            </div>
-            <button id="back-to-menu" class="menu-btn">BACK</button>
-        </div>
-    </div>
+<!-- HUD -->
+<div id="hud" hidden>
+  <div class="gauges">
+    <div class="gauge hp" id="g-hp"><span class="g-label">Health</span><div class="track"><i id="bar-hp"></i></div><span class="g-val" id="val-hp">100</span></div>
+    <div class="gauge san" id="g-san"><span class="g-label">Mind</span><div class="track"><i id="bar-san"></i></div><span class="g-val" id="val-san">Steady</span></div>
+    <div class="gauge bat" id="g-bat"><span class="g-label">Torch</span><div class="track"><i id="bar-bat"></i></div><span class="g-val" id="val-bat">100%</span></div>
+    <div class="gauge sta"><span class="g-label">Breath</span><div class="track thin"><i id="bar-sta"></i></div></div>
+  </div>
+  <div class="topright">
+    <div class="ward"><strong id="hud-level">Ward 1</strong><span id="hud-time">00:00</span></div>
+    <canvas id="minimap" width="150" height="150" aria-label="Map"></canvas>
+    <button id="btn-pause-touch" class="touch-only" aria-label="Pause">II</button>
+  </div>
+  <div class="objective" id="obj"><span class="obj-icon" aria-hidden="true"></span><span id="obj-text">Fuses restored</span><b id="val-fuses">0/0</b></div>
+  <div class="inventory"><span class="flare-ico" aria-hidden="true"></span>Flares <b id="val-flares">2</b></div>
+  <div id="prompt" class="prompt" aria-live="polite"></div>
+  <div id="toast" class="toast" aria-live="polite"></div>
+  <div id="card" class="card"><h2 id="card-title">The Intake Ward</h2><p id="card-sub">Level 1</p></div>
+</div>
+<div id="fps" hidden></div>
 
-    <div id="settings-screen" class="screen">
-        <div class="settings-content">
-            <h2>SETTINGS</h2>
-            <div class="settings-grid">
-                <div class="setting-group">
-                    <label>Audio Volume</label>
-                    <input type="range" id="volume-slider" min="0" max="100" value="70">
-                </div>
-                <div class="setting-group">
-                    <label>Graphics Quality</label>
-                    <select id="graphics-quality">
-                        <option value="low">Low</option>
-                        <option value="medium" selected>Medium</option>
-                        <option value="high">High</option>
-                        <option value="ultra">Ultra</option>
-                    </select>
-                </div>
-                <div class="setting-group">
-                    <label>Motion Effects</label>
-                    <input type="checkbox" id="motion-effects" checked>
-                </div>
-                <div class="setting-group">
-                    <label>Haptic Feedback</label>
-                    <input type="checkbox" id="haptic-feedback" checked>
-                </div>
-            </div>
-            <button id="settings-back" class="menu-btn">BACK</button>
-        </div>
-    </div>
+<!-- touch controls -->
+<div id="touch" hidden>
+  <div id="stick-move" class="stick left"><div class="base"><div id="knob-move" class="knob"></div></div></div>
+  <div id="stick-aim" class="stick right"><div class="base"><div id="knob-aim" class="knob"></div></div></div>
+  <div class="tbtns">
+    <button id="t-run">Run</button><button id="t-flare">Flare</button><button id="t-light" class="on">Torch</button><button id="t-use">Use</button>
+  </div>
+</div>
 
-    <div id="particle-container"></div>
-    <div id="audio-controls" class="hidden">
-        <audio id="ambient-audio" loop></audio>
-        <audio id="sfx-audio"></audio>
-    </div>
+<!-- Main menu -->
+<section id="screen-menu" class="screen active" aria-label="Main menu">
+  <div class="menu-wrap">
+    <h1 class="title"><span>Nightmare</span><span>Survival</span></h1>
+    <p class="tagline">The ward lost power at 3:07 a.m. Something is still on shift.</p>
+    <nav class="menu" aria-label="Main">
+      <button id="btn-start" data-autofocus>Start survival</button>
+      <button id="btn-speed">Speedrun, five wards</button>
+      <button id="btn-lb">Leaderboard</button>
+      <button id="btn-howto">How to play</button>
+      <button id="btn-settings">Settings</button>
+    </nav>
+    <div class="menu-foot"><button id="btn-mute" class="link" aria-pressed="false">Sound on</button><span>Developed by 0x0806</span></div>
+  </div>
+</section>
 
-    <script src="script.js"></script>
+<!-- How to play -->
+<section id="screen-howto" class="screen" aria-label="How to play">
+  <div class="sheet wide">
+    <h2>Patient survival notes</h2>
+    <p class="lead">Restore every fuse in the ward, then reach the exit. Your torch is the only weapon you have, and it runs out.</p>
+    <div class="cols">
+      <div>
+        <h3>Controls</h3>
+        <dl class="keys">
+          <dt>W A S D</dt><dd>Move</dd>
+          <dt>Mouse</dt><dd>Aim the torch</dd>
+          <dt>Shift</dt><dd>Run (loud, tires you out)</dd>
+          <dt>Left click or F</dt><dd>Throw a flare</dd>
+          <dt>Right click or Q</dt><dd>Torch on / off</dd>
+          <dt>E</dt><dd>Use the exit</dd>
+          <dt>Esc or P</dt><dd>Pause</dd>
+        </dl>
+        <p class="small">Touch: left stick moves, right stick aims. Gamepad: sticks, A flare, X torch, Y use.</p>
+      </div>
+      <div>
+        <h3>What hunts you</h3>
+        <ul class="bestiary">
+          <li><b>Wraith.</b> Patrols and chases on sight. A lit torch makes you easier to spot.</li>
+          <li><b>Crawler.</b> Fast, hears everything. Flares make it flee.</li>
+          <li><b>Stalker.</b> Moves only while you are not looking at it. Keep it in the beam.</li>
+          <li><b>Howler.</b> Never moves. Its scream calls everything to you.</li>
+        </ul>
+        <h3>Staying alive</h3>
+        <ul class="bestiary">
+          <li>Darkness drains your mind. Low sanity brings hallucinations and eventually hurts you.</li>
+          <li>Fuses glow faintly through the dark. Pills, batteries and medkits are scattered around.</li>
+        </ul>
+      </div>
+    </div>
+    <button id="howto-back" class="btn">Back</button>
+  </div>
+</section>
+
+<!-- Leaderboard -->
+<section id="screen-leaderboard" class="screen" aria-label="Leaderboard">
+  <div class="sheet">
+    <h2>Survivors on this device</h2>
+    <div class="tabs" role="tablist">
+      <button class="tab on" data-mode="survival" role="tab" aria-selected="true">Survival</button>
+      <button class="tab" data-mode="speedrun" role="tab" aria-selected="false">Speedrun</button>
+    </div>
+    <div class="lb">
+      <div class="lb-head"><span>#</span><span>Name</span><span id="lb-head-val" class="num">Score</span><span id="lb-head-extra">Reached</span></div>
+      <ol id="lb-rows"></ol>
+    </div>
+    <div class="row"><button id="lb-back" class="btn">Back</button><button id="lb-clear" class="btn ghost">Erase scores</button></div>
+  </div>
+</section>
+
+<!-- Settings -->
+<section id="screen-settings" class="screen" aria-label="Settings">
+  <div class="sheet">
+    <h2>Settings</h2>
+    <div class="opts">
+      <label for="opt-volume">Volume <output id="opt-volume-val">70%</output></label>
+      <input type="range" id="opt-volume" min="0" max="100" value="70">
+      <label for="opt-brightness">Darkness <output id="opt-brightness-val">50%</output></label>
+      <input type="range" id="opt-brightness" min="0" max="100" value="50">
+      <label for="opt-quality">Graphics</label>
+      <select id="opt-quality"><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select>
+      <label for="opt-shake">Screen shake and glitches</label>
+      <input type="checkbox" id="opt-shake">
+      <label for="opt-haptics">Vibration</label>
+      <input type="checkbox" id="opt-haptics">
+      <label for="opt-fps">Show frame rate</label>
+      <input type="checkbox" id="opt-fps">
+    </div>
+    <p class="small">Higher darkness values make the ward harder to read. Turn off shake and glitches to reduce motion.</p>
+    <button id="settings-back" class="btn">Back</button>
+  </div>
+</section>
+
+<!-- Pause -->
+<section id="screen-pause" class="screen" aria-label="Paused">
+  <div class="sheet narrow">
+    <h2>Paused</h2>
+    <p class="lead">The ward waits. It is good at that.</p>
+    <div class="stack">
+      <button id="pause-resume" class="btn primary" data-autofocus>Resume</button>
+      <button id="pause-settings" class="btn">Settings</button>
+      <button id="pause-quit" class="btn ghost">Abandon run</button>
+    </div>
+  </div>
+</section>
+
+<!-- Death -->
+<section id="screen-death" class="screen" aria-label="You died">
+  <div class="sheet narrow dead">
+    <h2>You didn’t make it</h2>
+    <p id="death-cause" class="lead">Killed by a Wraith.</p>
+    <dl id="death-stats" class="stats"></dl>
+    <div id="death-name-row" class="name-row">
+      <label for="death-name">Name for the leaderboard</label>
+      <div class="inline"><input id="death-name" type="text" maxlength="14" placeholder="Unknown patient" autocomplete="off"><button id="death-save" class="btn">Save score</button></div>
+    </div>
+    <div class="row"><button id="death-retry" class="btn primary" data-autofocus>Try again</button><button id="death-menu" class="btn ghost">Main menu</button></div>
+  </div>
+</section>
+
+<!-- Level clear / victory -->
+<section id="screen-clear" class="screen" aria-label="Ward cleared">
+  <div class="sheet narrow">
+    <h2 id="clear-title">Ward cleared</h2>
+    <dl id="clear-stats" class="stats"></dl>
+    <div id="clear-name-row" class="name-row" hidden>
+      <label for="clear-name">Name for the leaderboard</label>
+      <div class="inline"><input id="clear-name" type="text" maxlength="14" placeholder="Unknown patient" autocomplete="off"><button id="clear-save" class="btn">Save time</button></div>
+    </div>
+    <div class="row"><button id="clear-next" class="btn primary" data-autofocus>Descend</button></div>
+    <div id="clear-actions-end" class="row" hidden><button id="clear-menu" class="btn ghost">Main menu</button></div>
+  </div>
+</section>
+
+<script src="script.js"></script>
 </body>
 </html>
