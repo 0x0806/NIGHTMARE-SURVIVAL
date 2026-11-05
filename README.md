@@ -8,6 +8,7 @@ Your sister is on the last floor. The lift needs fuses. Something is still on sh
 [![Play now](https://img.shields.io/badge/%E2%96%B6%20Play%20now-0x0806.github.io-9a1a1f?style=for-the-badge)](https://0x0806.github.io/NIGHTMARE-SURVIVAL/)
 [![Installable PWA](https://img.shields.io/badge/PWA-installable%20%26%20offline-f2c46d?style=for-the-badge&labelColor=06070a)](#install-as-an-app-pwa)
 [![Three.js](https://img.shields.io/badge/3D-Three.js%20r187-6fa89c?style=for-the-badge&labelColor=06070a)](#how-it-works)
+[![tests](https://github.com/0x0806/NIGHTMARE-SURVIVAL/actions/workflows/test.yml/badge.svg)](https://github.com/0x0806/NIGHTMARE-SURVIVAL/actions/workflows/test.yml)
 
 <img src="docs/screenshots/3d-corridor.png" alt="First-person view down a dark hospital corridor lit only by a flashlight, with graffiti reading LEAVE on the wall and a message from Wren on the radio" width="860">
 
