@@ -1,7 +1,7 @@
 /* Offline support. Code (pages, scripts, styles) is network-first so updates arrive immediately;
    fonts and icons are cache-first. Bump CACHE when the asset list changes. */
-const CACHE = 'nightmare-v3';
-const ASSETS = ['./', 'index.html', 'style.css', 'script.js', 'manifest.webmanifest', 'favicon.svg', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png', 'fonts/IMFellEnglishSC.woff2', 'fonts/SpecialElite.woff2'];
+const CACHE = 'nightmare-v4';
+const ASSETS = ['./', 'index.html', 'style.css', 'script.js', 'manifest.webmanifest', 'favicon.svg', 'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/icon-maskable-512.png', 'fonts/IMFellEnglishSC.woff2', 'fonts/SpecialElite.woff2'];
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS.map((u) => new Request(u, { cache: 'reload' })))).then(() => self.skipWaiting()));
 });

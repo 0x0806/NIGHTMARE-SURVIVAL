@@ -736,7 +736,7 @@ class Game {
 
   /* ---- input ---- */
   bindInput() {
-    this.isTouch = matchMedia('(pointer: coarse)').matches;
+    this.isTouch = matchMedia('(pointer: coarse)').matches; document.body.classList.toggle('is-touch', this.isTouch);
     addEventListener('keydown', (e) => {
       if (e.target && e.target.tagName === 'INPUT' && e.target.type === 'text') return;
       this.keys.add(e.code);
@@ -1189,7 +1189,7 @@ class Game {
   }
   drawLighting(c, cx, cy) {
     const L = this.level, P = this.player, z = this.zoom, ls = this.ls, lc = this.lightCv, g = this.lctx, q = this.qual;
-    const S = this.settings, dark = clamp(0.955 + (S.brightness - 50) / 50 * 0.04, 0.88, 0.985) - (this.state === 'menu' ? 0.11 : 0);
+    const S = this.settings, dark = clamp(0.955 + (S.brightness - 50) / 50 * 0.04, 0.88, 0.985) - (this.state === 'menu' ? 0.2 : 0);
     const lampOn = P.lightOn && P.battery > 0 && P.flicker <= 0 && !P.hidden;
     const ambR = this.state === 'menu' ? 230 : lampOn ? 150 : 95, rays = Math.max(24, Math.round(72 * q.rays));
     const amb = L.poly(P.x, P.y, 0, TAU, ambR, rays);
@@ -1272,6 +1272,16 @@ function fmtDate(t) { const d = new Date(t); return d.toLocaleDateString(undefin
 
 /* ───────────────────────────── boot ───────────────────────────── */
 function boot() {
+  // PWA install: Chromium fires beforeinstallprompt; iOS Safari has no prompt, so show instructions instead.
+  let deferred = null; const inst = $('btn-install');
+  const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+  addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferred = e; if (!standalone) inst.hidden = false; });
+  addEventListener('appinstalled', () => { inst.hidden = true; deferred = null; });
+  if (/iphone|ipad|ipod/i.test(navigator.userAgent) && !standalone) inst.hidden = false;
+  inst.addEventListener('click', async () => {
+    if (deferred) { deferred.prompt(); await deferred.userChoice.catch(() => {}); deferred = null; inst.hidden = true; }
+    else alert('To install: tap the Share button, then “Add to Home Screen”.');
+  });
   if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
   const bar = $('load-bar'); bar.style.width = '40%';
   const start = () => {
@@ -1279,6 +1289,7 @@ function boot() {
     const game = window.__game = new Game();
     setTimeout(() => { $('loading').classList.add('done'); }, 350);
     const q = new URLSearchParams(location.search), demo = q.get('demo');
+    if (q.get('mode') === 'speedrun') $('btn-speed').focus(); // manifest shortcut targets
     if (demo) { // developer shortcuts used for screenshots/testing
       $('loading').style.display = 'none';
       game.mouse = { x: innerWidth * 0.8, y: innerHeight * 0.35, has: true };
