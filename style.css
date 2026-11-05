@@ -1,5 +1,8 @@
 /* Nightmare Survival — interface styles.
    Visual language: a typed patient file under a dying lamp. Bone paper, sodium light, dried blood. */
+@font-face { font-family: 'IM Fell English SC'; src: url('fonts/IMFellEnglishSC.ttf') format('truetype'); font-display: swap; }
+@font-face { font-family: 'Special Elite'; src: url('fonts/SpecialElite.ttf') format('truetype'); font-display: swap; }
+
 :root {
   --void: #06070a;
   --ink: #0d1110;

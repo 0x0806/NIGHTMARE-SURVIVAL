@@ -4,7 +4,9 @@ A top-down flashlight horror game that runs in the browser. No build step, no de
 
 The ward lost power at 3:07 a.m. Restore every fuse, reach the exit, and don't let the dark get into your head.
 
-**Play:** open `index.html` in a modern browser, or serve the folder (`python3 -m http.server`) and visit `http://localhost:8000`.
+**Play online:** https://0x0806.github.io/NIGHTMARE-SURVIVAL/ (installable and playable offline after the first visit).
+
+**Run locally:** open `index.html` in a modern browser, or serve the folder (`python3 -m http.server`) and visit `http://localhost:8000`.
 
 ## How it plays
 
@@ -55,9 +57,11 @@ Volume, darkness, graphics quality (also auto-lowers if the frame rate drops), s
 | `index.html` | Screens, HUD and touch controls |
 | `style.css` | Interface styling |
 | `script.js` | Everything else |
+| `sw.js`, `manifest.webmanifest` | Offline cache and install support |
+| `fonts/`, `icons/` | Self-hosted fonts and icons (no third-party requests) |
 
 `script.js` is organised into: seeded level generator (rooms, corridors, props with guaranteed connectivity), grid-DDA raycaster used for lighting and line of sight, enemy AI (patrol / investigate / chase / search) over BFS flow fields, a procedural Web Audio engine (drones, heartbeat, positional growls, no audio files), a canvas renderer with pre-baked tile sprites, and the UI/state machine.
 
 ## Credits
 
-Developed by 0x0806. Fonts: IM Fell English SC and Special Elite (Google Fonts, with system fallbacks).
+Developed by 0x0806. Fonts: IM Fell English SC and Special Elite (SIL Open Font License), self-hosted.

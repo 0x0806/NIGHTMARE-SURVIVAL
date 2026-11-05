@@ -1,0 +1,15 @@
+{
+  "name": "Nightmare Survival",
+  "short_name": "Nightmare",
+  "description": "A top-down flashlight horror game that runs in your browser.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#06070a",
+  "theme_color": "#06070a",
+  "icons": [
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

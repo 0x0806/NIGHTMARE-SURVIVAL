@@ -1169,6 +1169,7 @@ function fmtDate(t) { const d = new Date(t); return d.toLocaleDateString(undefin
 
 /* ───────────────────────────── boot ───────────────────────────── */
 function boot() {
+  if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
   const bar = $('load-bar'); bar.style.width = '40%';
   const start = () => {
     bar.style.width = '100%';
