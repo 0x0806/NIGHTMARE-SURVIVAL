@@ -1,0 +1,26 @@
+// PWA + smoke checks: service worker, precache, installability, manifest assets, play, offline reload, 404.
+import { launch, sleep } from './chrome.mjs';
+const BASE = process.argv[2] || process.env.BASE_URL;
+const res = []; const ok = (n, v, x = '') => res.push(`${v ? 'PASS' : 'FAIL'}  ${n} ${x}`);
+const b = await launch(); const p = await b.newPage(); await p.setViewport({ width: 1280, height: 720 });
+const errs = []; p.on('pageerror', (e) => errs.push('pageerror: ' + e.message)); p.on('console', (m) => { if (m.type() === 'error' && !/AudioContext|vibrate|favicon/.test(m.text())) errs.push('console.error: ' + m.text().slice(0, 200)); });
+await p.goto(BASE, { waitUntil: 'networkidle0' });
+ok('title', (await p.title()) === 'Nightmare Survival');
+const sw = await p.evaluate(async () => { const r = await navigator.serviceWorker.ready; return r.active && r.active.state; }); ok('service worker active', sw === 'activated', sw);
+const keys = await p.evaluate(async () => { const n = (await caches.keys())[0]; return (await (await caches.open(n)).keys()).map((k) => new URL(k.url).pathname); });
+ok('precache includes the 3D engine', keys.some((k) => k.endsWith('js/view3d.js')) && keys.some((k) => k.endsWith('three.module.min.js')), `${keys.length} entries`);
+const cdp = await p.createCDPSession(); await cdp.send('Page.enable');
+const inst = await cdp.send('Page.getInstallabilityErrors'); ok('installable (no manifest errors)', inst.installabilityErrors.length === 0, JSON.stringify(inst.installabilityErrors));
+const man = await (await fetch(new URL('manifest.webmanifest', BASE))).json(); const bad = [];
+for (const i of [...man.icons, ...man.screenshots]) { const r = await fetch(new URL(i.src, BASE)); if (!r.ok) bad.push(i.src); } ok('manifest icons and screenshots resolve', bad.length === 0, bad.join(','));
+await sleep(1200);
+await p.click('#btn-endless'); await sleep(3500);
+ok('endless run starts in 3D', await p.evaluate(() => __game.state === 'play' && __game.use3d));
+await p.keyboard.down('KeyW'); await sleep(700); await p.keyboard.up('KeyW');
+ok('flare, torch, pause and resume', await p.evaluate(() => { const g = __game; g.throwFlare(); const f = g.flares.length === 1; g.toggleLight(); const t = !g.player.lightOn; g.toggleLight(); g.pause(); const pa = g.state === 'paused'; g.resume(); return f && t && pa && g.state === 'play'; }));
+await p.setOfflineMode(true); await p.reload({ waitUntil: 'load' }).catch(() => {}); await sleep(1500);
+await p.evaluate(async () => { await __game.startRun('survival'); __game.fade = 0; }); await sleep(2500);
+ok('offline: reload and start a 3D run from cache', await p.evaluate(() => __game.use3d && __game.state === 'play')); await p.setOfflineMode(false);
+const r404 = await fetch(new URL('does-not-exist', BASE)); ok('custom 404 page', r404.status === 404 && (await r404.text()).includes('Lost in the ward'));
+console.log(res.join('\n')); console.log('page errors:', errs.length ? '\n  ' + errs.join('\n  ') : 'none'); await b.close();
+process.exit(res.some((l) => l.startsWith('FAIL')) || errs.length ? 1 : 0);

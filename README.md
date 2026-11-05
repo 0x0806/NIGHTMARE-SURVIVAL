@@ -92,7 +92,7 @@ The game never leaves you guessing about *what to do*: each ward opens with a br
 - **Noise.** Sprinting is loud, standing still is quiet, a thrown flare is loud. Enemies react to what they hear.
 - **Lockers.** Press `E` beside one to hide. Hunters lose sight of you, but ones that come looking will find you if they stand next to the locker long enough.
 - **Lamps.** Some rooms have ceiling lamps. Lit rooms calm your mind and freeze the Stalker. Many of them are failing and flicker.
-- **Pressure.** The ward keeps hunting. Every so often a hunter is sent to where you last were, so staying still in the open gets you found.
+- **Pressure.** The ward keeps hunting. Every so often a hunter is sent to where you were last *exposed* (not where you are right now), so a locker is a real hiding place, but staying put in the open gets you found. In story ward 1 pressure stays off until you pick up your first fuse, so you can learn the basics.
 - **Case file.** Each ward hides a staff note. Collected notes are saved across runs.
 - **Onboarding.** Wren (or a "Tip" in the other modes) explains each mechanic the first time it matters: your first Crawler, a dying battery, your first locker. Each hint appears once.
 
@@ -111,7 +111,8 @@ Deliberately hard. The numbers, in plain terms:
 - Monsters hit hard and hear you from a long way off. A Crawler is as fast as your sprint, and your breath runs out first, so you need flares or a locker to get away from one. A Wraith is slower than a sprint, but it does not tire.
 - Batteries, medkits and pills are scarce, and get scarcer the deeper you go. The torch drains about 1% every two seconds.
 - From ward 4, a Howler can call everything to you at any moment.
-- A **pressure timer** (every 26 to 55 seconds depending on difficulty) sends a hunter to your position, so you cannot camp and recover.
+- **The lift alarm.** Restoring the last fuse sets off the lift alarm, which sends every hunter to the lift. You have to get there through them.
+- A **pressure timer** (every 26 to 55 seconds depending on difficulty) sends a hunter to where you were last exposed, so you cannot camp in the open and recover.
 - Three difficulty levels: **Easy**, **Normal** and **Nightmare** (faster, more aggressive hunters, more frequent pressure, and a 1.6× score multiplier). A small adaptive director also nudges pace up or down depending on how you did in the previous ward.
 
 I have verified that every ward is *completable* (see [Testing](#testing)), but I have not play-tested the difficulty with a human, so treat these values as a first pass and expect to tune them.
@@ -182,20 +183,24 @@ vendor/                 Three.js r187 (MIT), core + module build
 sw.js                   Service worker (offline support)
 manifest.webmanifest    PWA manifest
 fonts/  icons/  docs/   Fonts, app icons, README screenshots
+tests/                  Headless-browser test suite (npm test)
 ```
 
 ## Testing
 
-There is no unit-test framework in the repository. The game was checked with scripted headless Chromium runs (software WebGL; the harness is not part of this repository) covering:
+```bash
+npm install
+npm test            # starts a local server and runs everything
+npm run test:live   # runs the same checks against the deployed site
+```
 
-- **3D rendering:** frame is lit and has structure; no shader recompiles while moving, turning and throwing flares; no geometry or texture leak across repeated level loads.
-- **Mechanics in 3D:** the Stalker attacks from behind and freezes in the beam; hiding in a locker works.
-- **Story flow:** prologue, skip, auto-save, radio messages, retry-on-death with penalty, both endings (normal, and truth with 10+ notes), score screen, lift compass, pressure timer.
-- **Soak:** a bot plays through nine consecutive wards in first person with damage disabled, to catch exceptions, unreachable fuses and leaks.
-- **Fallbacks:** top-down mode, and `file://` (module blocked).
-- **Live site:** the deployed GitHub Pages build is audited the same way plus Lighthouse.
+You need Node 18+ and a Chrome or Chromium; set `CHROME_PATH` if it is not in a standard location. The tests run in headless Chrome with software WebGL, so they need no GPU. Three scripts live in `tests/`:
 
-Not verified: real GPU performance (the tests use a software renderer), real audio, real touch hardware, and the difficulty with a human player.
+- `suite.mjs`: 3D rendering (frame is lit, **no shader programs compile while playing**, no geometry or texture leak across repeated level loads); mechanics in 3D (the Stalker attacks from behind and freezes in the beam; lockers); fairness (hiding is not guaranteed to fail when pressure fires); story flow (prologue, skip, auto-save, radio, ward-1 onboarding, retry on death, both endings, score screen, lift compass, lift alarm); and the fallbacks (top-down mode, `file://`).
+- `pwa.mjs`: service worker, precache including the 3D engine, installability, manifest assets, a 3D run, offline reload, custom 404.
+- `soak.mjs`: a bot plays nine consecutive wards in first person (damage off) to catch exceptions, unreachable fuses and leaks.
+
+**Not covered:** real GPU performance, real audio, real touch hardware, and how the difficulty feels to a human player. The balance numbers are my estimates and have not been playtested.
 
 ## Credits
 

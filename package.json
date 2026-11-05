@@ -1,0 +1,16 @@
+{
+  "name": "nightmare-survival",
+  "version": "2.0.0",
+  "private": true,
+  "description": "A first-person 3D horror game that runs in the browser. No build step; this file only exists to run the tests.",
+  "type": "module",
+  "scripts": {
+    "start": "node -e \"import('./tests/server.mjs').then(async m => { const s = await m.startServer(8000); console.log('Serving ' + s.url); })\"",
+    "test": "node tests/run.mjs",
+    "test:live": "node tests/run.mjs --base=https://0x0806.github.io/NIGHTMARE-SURVIVAL/"
+  },
+  "devDependencies": {
+    "pngjs": "^7.0.0",
+    "puppeteer-core": "^24.0.0"
+  }
+}

@@ -59,6 +59,7 @@ const STORY = {
     6: { title: 'The Chapel', brief: 'Chapter VI. Almost there.', open: 'They brought the ones who wouldn’t stop asking questions to the chapel. Keep going. Don’t read the walls.', mid: 'There’s a chart on my wall. It’s in your handwriting.', done: 'Almost there. Please don’t be angry with me.' },
     7: { title: 'The Last Ward', brief: 'Chapter VII. Everything is awake.', open: 'This is it. I’m just past the last door. Restore the lift and come to me. Everything is awake. Everything.', mid: 'Almost. Don’t turn around.', done: '…' },
   },
+  alarm: 'The lift alarm is screaming. Everything just heard it. Hurry!',
   endings: {
     escape: { title: 'Ending: Patient 14', lines: [
       'The lift shudders to a stop. The Last Ward is a single room with a single bed.',
@@ -198,6 +199,7 @@ class AudioEngine {
   powerUp() { this.tone({ type: 'sawtooth', f0: 60, f1: 600, dur: 1.4, vol: 0.14, lp: 1200 }); this.tone({ f0: 880, dur: 1.2, vol: 0.06, delay: 0.9 }); }
   death() { this.tone({ f0: 140, f1: 25, dur: 2.2, vol: 0.4, type: 'sawtooth', lp: 400 }); this.burst({ dur: 1.5, vol: 0.2, f: 1500, f1: 80 }); }
   win() { [262, 330, 392, 523].forEach((f, i) => this.tone({ f0: f, dur: 1.8, vol: 0.09, delay: i * 0.18, type: 'triangle' })); }
+  alarm() { for (let i = 0; i < 8; i++) this.tone({ type: 'triangle', f0: i % 2 ? 640 : 880, dur: 0.32, vol: 0.12, delay: i * 0.34, lp: 2600 }); this.burst({ dur: 0.6, vol: 0.12, f: 3000, type: 'highpass' }); }
   ui() { this.tone({ f0: 420, f1: 300, dur: 0.07, vol: 0.05, type: 'triangle' }); }
   whisper(pan = 0) { for (let i = 0; i < 4; i++) this.burst({ dur: 0.25, vol: 0.07, f: rnd(1500, 2600), q: 7, type: 'bandpass', pan, delay: i * rnd(0.18, 0.3) }); }
   creak(pan = 0) { this.tone({ type: 'sawtooth', f0: rnd(90, 150), f1: rnd(60, 110), dur: rnd(0.7, 1.4), vol: 0.05, pan, lp: 500, vib: 6, attack: 0.2 }); }
@@ -692,7 +694,7 @@ class Game {
     P.x = L.start.x; P.y = L.start.y; P.vx = P.vy = 0; P.pitch = 0; P.hidden = false; P.hideTile = null; P.hideK = 0;
     if (!retry) { P.sanity = Math.min(100, P.sanity + 20); P.hp = Math.min(100, P.hp + (n > 1 ? 8 : 0)); }
     this.wardStart = { hp: P.hp, sanity: P.sanity, battery: P.battery, flares: P.flares };
-    this.run.level = n; this.run.levelTime = 0; this.run.levelDamage = 0; this.time = 0; this.fade = 1; this.pressureT = this.pressureEvery * 0.8;
+    this.run.level = n; this.run.levelTime = 0; this.run.levelDamage = 0; this.time = 0; this.fade = 1; this.pressureT = (this.mode === 'story' && n === 1) ? 1e9 : this.pressureEvery * 0.9; this.lastExposed = { x: P.x, y: P.y };
     this.cam.x = P.x - this.cv.width / this.zoom / 2; this.cam.y = P.y - this.cv.height / this.zoom / 2;
     this.playerField = null; this.fieldT = 0; this.shakeT = 0; this.threat = 0; this.msgT = 0; this.damageFlash = 0; this.glitch = 0;
     L.reveal(P.x, P.y, 6);
@@ -734,6 +736,18 @@ class Game {
     $('clear-next').textContent = 'Descend to ward ' + (n + 1);
     $('clear-name-row').hidden = true; $('clear-actions-end').hidden = true; $('clear-next').hidden = false;
     this.showScreen('clear'); this.vibrate([40, 60, 40]);
+  }
+  /** Pressure aims at where you were last exposed, with scatter, so it never reads your live position while you hide. */
+  pressureTarget() {
+    const L = this.level, lx = Math.floor(this.lastExposed.x / TS), ly = Math.floor(this.lastExposed.y / TS);
+    for (let k = 0; k < 40; k++) { const x = lx + rint(-6, 6), y = ly + rint(-6, 6); if (!L.solid(x, y)) return { x, y }; }
+    return { x: lx, y: ly };
+  }
+  /** The lift alarm: when the last fuse goes in, every hunter is sent to the lift. */
+  liftAlarm() {
+    const ex = this.level.exit; this.audio.alarm(); this.cam.shake = Math.max(this.cam.shake, 8);
+    for (const e of this.enemies) if (e.type === 'wraith' || e.type === 'crawler') { e.state = 'investigate'; e.goTo(this, ex.tx, ex.ty); e.pause = 0; }
+    if (this.mode === 'story') this.radio('Wren', STORY.alarm, 5); else this.toast('The lift alarm is screaming. Everything heard it.', 4);
   }
   addScore(n) { this.run.score += Math.round(n * this.diff.s); }
   nextLevel() { if (this.state === 'clear') { this.audio.ui(); this.beginLevel(this.run.level + 1); } }
@@ -1068,13 +1082,14 @@ class Game {
     this.audio.tick(dt, this.threat, P.sanity, P.hp / 100, chasing);
     P.flicker = (!unlit && (P.battery < 18 || P.sanity < 35) && Math.random() < 0.05 + (P.battery < 8 ? 0.1 : 0)) ? rnd(0.08, 0.3) : Math.max(0, P.flicker - dt);
 
+    if (!P.hidden) { this.lastExposed.x = P.x; this.lastExposed.y = P.y; }
     // world
     this.stepWorld(dt);
     this.pressureT -= dt; // the ward keeps hunting: every so often something is sent to where you were
     if (this.pressureT <= 0) {
       this.pressureT = this.pressureEvery;
       const cands = this.enemies.filter((e) => (e.type === 'wraith' || e.type === 'crawler') && e.state !== 'chase');
-      if (cands.length) { const e = pick(cands); e.state = 'investigate'; e.goTo(this, Math.floor(P.x / TS), Math.floor(P.y / TS)); e.pause = 0; this.audio.creak(this.pan(e.x, e.y)); }
+      if (cands.length) { const e = pick(cands), t = this.pressureTarget(); e.state = 'investigate'; e.goTo(this, t.x, t.y); e.pause = 0; this.audio.creak(this.pan(e.x, e.y)); }
     }
     if (P.battery < 20 && P.battery > 0) this.hint('battery', 'Your torch is dying. Find batteries, or switch it off (Q) in a safe room to save power.');
     if (P.sanity < 40) this.hint('sanity', 'Your mind is fraying. Stand in lamp light, burn a flare, or find pills before it starts to hurt.');
@@ -1105,8 +1120,8 @@ class Game {
     for (const f of this.fuses) {
       f.t += dt; if (f.got || Math.hypot(f.x - P.x, f.y - P.y) > 32) continue;
       f.got = true; this.fuseGot++; this.run.fuses++; this.addScore(150); this.audio.pickup('fuse'); this.vibrate([30, 30, 30]);
-      if (this.fuseGot === 1 && this.fuseNeed > 1) this.storyMsg('mid');
-      if (this.fuseGot >= this.fuseNeed) { this.toast('All fuses restored. The lift is live. Reach it.', 4); this.audio.powerUp(); this.hint('lift', 'The lift hums when it has power. Follow the arrow at the top of your screen.'); } else this.toast(`Fuse ${this.fuseGot} of ${this.fuseNeed}`);
+      if (this.fuseGot === 1 && this.fuseNeed > 1) { this.storyMsg('mid'); if (this.pressureT > 1e8) this.pressureT = this.pressureEvery; }
+      if (this.fuseGot >= this.fuseNeed) { this.toast('All fuses restored. The lift is live. Reach it.', 4); this.audio.powerUp(); this.liftAlarm(); this.hint('lift', 'The lift hums when it has power. Follow the arrow at the top of your screen.'); } else this.toast(`Fuse ${this.fuseGot} of ${this.fuseNeed}`);
     }
     // exit prompt
     const ex = L.exit, nearExit = Math.hypot(P.x - ex.x, P.y - ex.y) < 80;
